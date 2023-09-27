@@ -8,7 +8,13 @@ document.querySelector("#message-form").addEventListener("submit", (e) => {
   e.preventDefault();
 
   const message = e.target.elements.message.value;
-  socket.emit("sendMessage", message); // sends message to the server
+  socket.emit("sendMessage", message, (error) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("This message was delivered!");
+    }
+  }); // sends message to the server
 });
 
 socket.on("msgAllClient", (message) => {
@@ -27,6 +33,8 @@ document.querySelector("#send-location").addEventListener("click", () => {
     };
 
     // Sends Location to the server
-    socket.emit("shareLocation", location);
+    socket.emit("shareLocation", location, () => {
+      console.log("Location shared with other users!");
+    });
   });
 });
