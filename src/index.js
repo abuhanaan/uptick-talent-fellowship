@@ -19,12 +19,11 @@ let welcomeMessage = "Welcome here!!!";
 io.on("connection", (socket) => {
   console.log("New WebSocket connection");
 
-  socket.emit("countUpdated", count);
+  socket.emit("welcome", welcomeMessage);
 
-  socket.on("increment", () => {
-    count++;
-    // Sends message to all connected clients
-    io.emit("countUpdated", count);
+  socket.on("sendMessage", (message) => {
+    // Send message to all conected client
+    io.emit("msgAllClient", message);
   });
 });
 
