@@ -20,10 +20,16 @@ io.on("connection", (socket) => {
   console.log("New WebSocket connection");
 
   socket.emit("welcome", welcomeMessage);
+  socket.broadcast.emit("welcome", "A new user has joined!");
 
   socket.on("sendMessage", (message) => {
     // Send message to all conected client
     io.emit("msgAllClient", message);
+  });
+
+  // for disconnected user
+  socket.on("disconnect", () => {
+    io.emit("welcome", "A user has left");
   });
 });
 
