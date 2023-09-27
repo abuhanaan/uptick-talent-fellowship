@@ -14,3 +14,19 @@ document.querySelector("#message-form").addEventListener("submit", (e) => {
 socket.on("msgAllClient", (message) => {
   console.log(message);
 });
+
+document.querySelector("#send-location").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    return alert("Your Browser Version Des Not Support Location");
+  }
+
+  navigator.geolocation.getCurrentPosition((position) => {
+    const location = {
+      longitude: position.coords.longitude,
+      latitude: position.coords.latitude,
+    };
+
+    // Sends Location to the server
+    socket.emit("shareLocation", location);
+  });
+});
