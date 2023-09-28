@@ -3,6 +3,7 @@ const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const Filter = require("bad-words");
+const { generateMessageData } = require("./utils/messageData");
 
 const app = express();
 const server = http.createServer(app);
@@ -20,8 +21,11 @@ let welcomeMessage = "Welcome here!!!";
 io.on("connection", (socket) => {
   console.log("New WebSocket connection");
 
-  socket.emit("message", welcomeMessage);
-  socket.broadcast.emit("message", "A new user has joined!");
+  socket.emit("message", generateMessageData(welcomeMessage));
+  socket.broadcast.emit(
+    "message",
+    generateMessageData("A new user has joined!")
+  );
 
   socket.on("sendMessage", (message, callback) => {
     const filter = new Filter();
@@ -32,7 +36,7 @@ io.on("connection", (socket) => {
     }
     // Send message to all connected client
     // io.emit("msgAllClient", message);
-    io.emit("message", message);
+    io.emit("message", generateMessageData(message));
     callback(); // callback called without argument to indicate no error
   });
 
@@ -48,7 +52,7 @@ io.on("connection", (socket) => {
 
   // for disconnected user
   socket.on("disconnect", () => {
-    io.emit("message", "A user has left");
+    io.emit("message", generateMessageData("A user has left"));
   });
 });
 
