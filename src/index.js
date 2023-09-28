@@ -20,8 +20,8 @@ let welcomeMessage = "Welcome here!!!";
 io.on("connection", (socket) => {
   console.log("New WebSocket connection");
 
-  socket.emit("welcome", welcomeMessage);
-  socket.broadcast.emit("welcome", "A new user has joined!");
+  socket.emit("message", welcomeMessage);
+  socket.broadcast.emit("message", "A new user has joined!");
 
   socket.on("sendMessage", (message, callback) => {
     const filter = new Filter();
@@ -31,13 +31,14 @@ io.on("connection", (socket) => {
       return callback("Foul Language Not Allowed");
     }
     // Send message to all connected client
-    io.emit("msgAllClient", message);
+    // io.emit("msgAllClient", message);
+    io.emit("message", message);
     callback(); // callback called without argument to indicate no error
   });
 
   socket.on("shareLocation", (location, callback) => {
     socket.broadcast.emit(
-      "welcome",
+      "message",
       `https://google.com/maps?q=${location.latitude},${location.longitude}`
     );
 
@@ -47,7 +48,7 @@ io.on("connection", (socket) => {
 
   // for disconnected user
   socket.on("disconnect", () => {
-    io.emit("welcome", "A user has left");
+    io.emit("message", "A user has left");
   });
 });
 
