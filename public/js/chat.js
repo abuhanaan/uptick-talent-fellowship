@@ -64,10 +64,11 @@ $shareLocationButton.addEventListener("click", () => {
   });
 });
 
-socket.on("locationMessage", (locationURL) => {
-  console.log(locationURL);
+socket.on("locationMessage", (data) => {
+  console.log(data.url);
   const html = Mustache.render(locationTemplate, {
-    url: locationURL,
+    url: data.url,
+    createdAt: moment(data.createdAt).format("h:mm a"),
   });
   $messages.insertAdjacentHTML("beforeend", html);
 });
