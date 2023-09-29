@@ -7,6 +7,12 @@ const {
   generateMessageData,
   generateLocationData,
 } = require("./utils/messageData");
+const {
+  getUser,
+  removeUser,
+  addUser,
+  getUsersInRoom,
+} = require("./utils/users");
 
 const app = express();
 const server = http.createServer(app);
@@ -30,13 +36,20 @@ io.on("connection", (socket) => {
   //   generateMessageData("A new user has joined!")
   // );
 
-  socket.on("join", ({ username, room }) => {
-    socket.join(room); // Enables a user to join a particular room
+  socket.on("join", ({ username, room }, callback) => {
+    const { error, user } = addUser({ id: socket.id, username, room });
+    if (error) {
+      return callback(error);
+    }
+
+    socket.join(user.room); // Enables a user to join a particular room
     socket.emit("message", generateMessageData(welcomeMessage));
     // Sends message to all connected user in a particular room
     socket.broadcast
-      .to(room)
-      .emit("message", generateMessageData(`${username} has joined!`));
+      .to(user.room)
+      .emit("message", generateMessageData(`${user.username} has joined!`));
+
+    callback();
   });
 
   socket.on("sendMessage", (message, callback) => {
@@ -66,7 +79,13 @@ io.on("connection", (socket) => {
 
   // for disconnected user
   socket.on("disconnect", () => {
-    io.emit("message", generateMessageData("A user has left"));
+    const leavingUser = removeUser(socket.id);
+    if (leavingUser) {
+      io.to(leavingUser.room).emit(
+        "message",
+        generateMessageData(`${leavingUser.username} has left`)
+      );
+    }
   });
 });
 
