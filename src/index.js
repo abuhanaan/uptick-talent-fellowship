@@ -24,11 +24,20 @@ let welcomeMessage = "Welcome here!!!";
 io.on("connection", (socket) => {
   console.log("New WebSocket connection");
 
-  socket.emit("message", generateMessageData(welcomeMessage));
-  socket.broadcast.emit(
-    "message",
-    generateMessageData("A new user has joined!")
-  );
+  // socket.emit("message", generateMessageData(welcomeMessage));
+  // socket.broadcast.emit(
+  //   "message",
+  //   generateMessageData("A new user has joined!")
+  // );
+
+  socket.on("join", ({ username, room }) => {
+    socket.join(room); // Enables a user to join a particular room
+    socket.emit("message", generateMessageData(welcomeMessage));
+    // Sends message to all connected user in a particular room
+    socket.broadcast
+      .to(room)
+      .emit("message", generateMessageData(`${username} has joined!`));
+  });
 
   socket.on("sendMessage", (message, callback) => {
     const filter = new Filter();
