@@ -23,8 +23,6 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 
 app.use(express.static(publicDirectoryPath));
 
-let count = 0;
-
 let welcomeMessage = "Welcome here!!!";
 
 io.on("connection", (socket) => {
@@ -43,14 +41,21 @@ io.on("connection", (socket) => {
     }
 
     socket.join(user.room); // Enables a user to join a particular room
-    socket.emit("message", generateMessageData(user.username, welcomeMessage));
+    socket.emit("message", generateMessageData("Admin", welcomeMessage));
     // Notifies all connected user in a particular room
     socket.broadcast
       .to(user.room)
       .emit(
         "message",
-        generateMessageData(user.username, `${user.username} has joined!`)
+        generateMessageData(`Admin`, `${user.username} has joined!`)
       );
+
+    // Sending users list to room when user joins
+    io.to(user.room).emit("roomData", {
+      room: user.room,
+      users: getUsersInRoom(user.room),
+    });
+
     callback();
   });
 
@@ -95,6 +100,11 @@ io.on("connection", (socket) => {
         "message",
         generateMessageData(`Admin`, `${leavingUser.username} has left`)
       );
+      // Sending users list to room when user leaves
+      io.to(leavingUser.room).emit("roomData", {
+        room: leavingUser.room,
+        users: getUsersInRoom(leavingUser.room),
+      });
     }
   });
 });
