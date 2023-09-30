@@ -43,32 +43,42 @@ io.on("connection", (socket) => {
     }
 
     socket.join(user.room); // Enables a user to join a particular room
-    socket.emit("message", generateMessageData(welcomeMessage));
-    // Sends message to all connected user in a particular room
+    socket.emit("message", generateMessageData(user.username, welcomeMessage));
+    // Notifies all connected user in a particular room
     socket.broadcast
       .to(user.room)
-      .emit("message", generateMessageData(`${user.username} has joined!`));
-
+      .emit(
+        "message",
+        generateMessageData(user.username, `${user.username} has joined!`)
+      );
     callback();
   });
 
   socket.on("sendMessage", (message, callback) => {
+    const user = getUser(socket.id);
     const filter = new Filter();
 
     // Checks For Foul Language in Message
     if (filter.isProfane(message)) {
       return callback("Foul Language Not Allowed");
     }
-    // Send message to all connected client
-    // io.emit("msgAllClient", message);
-    io.emit("message", generateMessageData(message));
+
+    if (user) {
+      // Send message to all connected client in a particular room
+      io.to(user.room).emit(
+        "message",
+        generateMessageData(user.username, message)
+      );
+    }
     callback(); // callback called without argument to indicate no error
   });
 
   socket.on("shareLocation", (location, callback) => {
-    io.emit(
+    const user = getUser(socket.id);
+    io.to(user.room).emit(
       "locationMessage",
       generateLocationData(
+        user.username,
         `https://google.com/maps?q=${location.latitude},${location.longitude}`
       )
     );
@@ -83,7 +93,7 @@ io.on("connection", (socket) => {
     if (leavingUser) {
       io.to(leavingUser.room).emit(
         "message",
-        generateMessageData(`${leavingUser.username} has left`)
+        generateMessageData(`Admin`, `${leavingUser.username} has left`)
       );
     }
   });

@@ -37,12 +37,7 @@ const removeUser = (id) => {
 
 const getUser = (id) => {
   const user = users.find((user) => user.id === id);
-  if (!user) {
-    return {
-      error: undefined,
-    };
-  }
-  return { user };
+  return user;
 };
 
 const getUsersInRoom = (room) => {
