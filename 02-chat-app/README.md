@@ -4,7 +4,7 @@
 
 Create a simple distributed chat application using WebSocket technology. Users can join chat rooms and exchange messages in real-time.
 
-### Live URL: `https://chat-app-pdtt.onrender.com/`
+### Live URL: [https://chat-app-pdtt.onrender.com/](https://chat-app-pdtt.onrender.com/)
 
 ---
 
