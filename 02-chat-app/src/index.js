@@ -3,6 +3,7 @@ const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const Filter = require("bad-words");
+const Democracy = require("democracy");
 const {
   generateMessageData,
   generateLocationData,
@@ -18,7 +19,19 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
+const port = parseInt(process.argv[2], 10);
+
+const dem = new Democracy({
+  source: `0.0.0.0:${port}`,
+  peers: ["0.0.0.0:3000", "0.0.0.0:3001"],
+});
+
+dem.subscribe("global");
+dem.on("global", (msg) => {
+  io.emit(msg);
+});
+
 const publicDirectoryPath = path.join(__dirname, "../public");
 
 app.use(express.static(publicDirectoryPath));
@@ -26,7 +39,7 @@ app.use(express.static(publicDirectoryPath));
 let welcomeMessage = "Welcome here!!!";
 
 io.on("connection", (socket) => {
-  console.log("New WebSocket connection");
+  console.log("New WebSocket connection on port:", port);
 
   // socket.emit("message", generateMessageData(welcomeMessage));
   // socket.broadcast.emit(
@@ -42,6 +55,7 @@ io.on("connection", (socket) => {
 
     socket.join(user.room); // Enables a user to join a particular room
     socket.emit("message", generateMessageData("Admin", welcomeMessage));
+    // dem.publish("global", generateMessageData("Admin", welcomeMessage));
     // Notifies all connected user in a particular room
     socket.broadcast
       .to(user.room)
@@ -107,8 +121,4 @@ io.on("connection", (socket) => {
       });
     }
   });
-});
-
-server.listen(port, () => {
-  console.log(`Server is up on port ${port}!`);
 });
